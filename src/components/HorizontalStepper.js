@@ -1,72 +1,65 @@
-import { TextField } from '@material-ui/core'
-import Button from '@material-ui/core/Button'
-import Step from '@material-ui/core/Step'
-import StepLabel from '@material-ui/core/StepLabel'
-import Stepper from '@material-ui/core/Stepper'
-import { makeStyles } from '@material-ui/core/styles'
-import Typography from '@material-ui/core/Typography'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import FormLabel from '@mui/material/FormLabel'
-import Radio from '@mui/material/Radio'
-import RadioGroup from '@mui/material/RadioGroup'
-import { Formik } from 'formik'
-import React from 'react'
-import { useHistory } from 'react-router-dom'
-import * as Yup from 'yup'
+import { TextField, Button, Step, StepLabel, Stepper, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import { Formik } from 'formik';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import * as Yup from 'yup';
 
-const useStyles = makeStyles((theme) => ({
-  mainContainer: {
+const Root = styled('div')(({ theme }) => ({
+  '.mainContainer': {
     margin: 'auto',
     border: '1px solid #ccc',
     borderRadius: '4px',
   },
-  formContainer: {
+  '.formContainer': {
     margin: '2rem 0 2rem',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
-  formGroup: {
+  '.formGroup': {
     marginBottom: '2rem',
   },
-  resetContainer: {
+  '.resetContainer': {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
   },
-  backButton: {
+  '.backButton': {
     marginRight: theme.spacing(1),
   },
-  instructions: {
+  '.instructions': {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
   },
-  textField: {
+  '.textField': {
     '& > *': {
       margin: theme.spacing(1),
       width: '25ch',
     },
   },
-  textfieldWidth: {
+  '.textfieldWidth': {
     width: 200,
   },
-  teamNameHeading: {
+  '.teamNameHeading': {
     fontWeight: 'bold',
-    // padding: '16px',
-    // paddingBottom: '0px',
   },
-  center: {
+  '.center': {
     textAlign: 'center',
   },
-}))
+}));
+
 const HorizontalStepper = () => {
-  const history = useHistory()
-  const classes = useStyles()
+  const history = useHistory();
   const [activeStep, setActiveStep] = React.useState(0)
   const [isSubmitting, setSubmitting] = React.useState(false)
 
-  const steps = ['Team', 'Overs', 'Batting']
+  const steps = ['Team', 'Players', 'Overs', 'Batting']
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1)
   }
@@ -76,6 +69,8 @@ const HorizontalStepper = () => {
   const initialValues = {
     team1: '',
     team2: '',
+    team1Players: Array(11).fill(''),
+    team2Players: Array(11).fill(''),
     maxOver: '',
     batting: '',
   }
@@ -83,6 +78,10 @@ const HorizontalStepper = () => {
     Yup.object().shape({
       team1: Yup.string().required('Team Name is required'),
       team2: Yup.string().required('Team Name is required'),
+    }),
+    Yup.object().shape({
+      team1Players: Yup.array().of(Yup.string().required('Player name is required')),
+      team2Players: Yup.array().of(Yup.string().required('Player name is required')),
     }),
     Yup.object().shape({
       maxOver: Yup.string().required('Over is required'),
@@ -96,7 +95,7 @@ const HorizontalStepper = () => {
     return activeStep === steps.length - 1
   }
   return (
-    <div>
+    <Root>
       <Stepper activeStep={activeStep} orientation='horizontal'>
         {steps.map((label) => (
           <Step key={label}>
@@ -104,7 +103,7 @@ const HorizontalStepper = () => {
           </Step>
         ))}
       </Stepper>
-      <div className={classes.mainContainer}>
+      <div className='mainContainer'>
         <Formik
           enableReinitialize
           validationSchema={currentValidationSchema}
@@ -126,10 +125,10 @@ const HorizontalStepper = () => {
             const { values, touched, errors, handleChange, handleBlur, handleSubmit, setFieldValue } = prp
             return (
               <form onSubmit={handleSubmit}>
-                <div className={classes.formContainer}>
+                <div className='formContainer'>
                   {activeStep === 0 && (
                     <div>
-                      <div className={classes.formGroup}>
+                      <div className='formGroup'>
                         <TextField
                           id='team1'
                           name='team1'
@@ -139,13 +138,13 @@ const HorizontalStepper = () => {
                           onBlur={handleBlur}
                           helperText={errors.team1 && touched.team1 && errors.team1}
                           error={errors.team1 && touched.team1}
-                          className={classes.textfieldWidth}
+                          className='textfieldWidth'
                         />
                       </div>
                       <div>
-                        <Typography className={classes.center}>VS</Typography>
+                        <Typography className='center'>VS</Typography>
                       </div>
-                      <div className={classes.formGroup}>
+                      <div className='formGroup'>
                         <TextField
                           id='team2'
                           name='team2'
@@ -155,16 +154,48 @@ const HorizontalStepper = () => {
                           onBlur={handleBlur}
                           helperText={errors.team2 && touched.team2 && errors.team2}
                           error={errors.team2 && touched.team2}
-                          className={classes.textfieldWidth}
+                          className='textfieldWidth'
                         />
                       </div>
                     </div>
                   )}
                   {activeStep === 1 && (
                     <div>
-                      <div className={classes.formGroup} id='team1-players'>
-                        <Typography className={classes.teamNameHeading}>How many overs?</Typography>
-                        <div className={classes.formGroup}>
+                      <Typography className='teamNameHeading'>{values.team1}</Typography>
+                      {values.team1Players.map((player, index) => (
+                        <div className='formGroup' key={index}>
+                          <TextField
+                            id={`team1Players[${index}]`}
+                            name={`team1Players[${index}]`}
+                            label={`Player ${index + 1}`}
+                            value={player}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            className='textfieldWidth'
+                          />
+                        </div>
+                      ))}
+                      <Typography className='teamNameHeading'>{values.team2}</Typography>
+                      {values.team2Players.map((player, index) => (
+                        <div className='formGroup' key={index}>
+                          <TextField
+                            id={`team2Players[${index}]`}
+                            name={`team2Players[${index}]`}
+                            label={`Player ${index + 1}`}
+                            value={player}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            className='textfieldWidth'
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeStep === 2 && (
+                    <div>
+                      <div className='formGroup' id='team1-players'>
+                        <Typography className='teamNameHeading'>How many overs?</Typography>
+                        <div className='formGroup'>
                           <TextField
                             id='maxOver'
                             name='maxOver'
@@ -174,15 +205,15 @@ const HorizontalStepper = () => {
                             onBlur={handleBlur}
                             helperText={errors.maxOver && touched.maxOver && errors.maxOver}
                             error={errors.maxOver && touched.maxOver}
-                            className={classes.textfieldWidth}
+                            className='textfieldWidth'
                           />
                         </div>
                       </div>
                     </div>
                   )}
-                  {activeStep === 2 && (
+                  {activeStep === 3 && (
                     <div>
-                      <div className={classes.formGroup}>
+                      <div className='formGroup'>
                         <FormControl component='fieldset'>
                           <FormLabel component='legend'>Who is Batting?</FormLabel>
                           <RadioGroup
@@ -200,7 +231,7 @@ const HorizontalStepper = () => {
                     </div>
                   )}
                   <div>
-                    <Button variant='contained' disabled={activeStep === 0} onClick={handleBack} className={classes.backButton}>
+                    <Button variant='contained' disabled={activeStep === 0} onClick={handleBack} className='backButton'>
                       Back
                     </Button>
                     <Button id='submit' disabled={isSubmitting} variant='contained' color='primary' type='submit'>
@@ -213,7 +244,7 @@ const HorizontalStepper = () => {
           }}
         </Formik>
       </div>
-    </div>
+    </Root>
   )
 }
 

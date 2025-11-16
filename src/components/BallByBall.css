@@ -1,0 +1,25 @@
+.ball-by-ball-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.feed {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.over {
+  margin-bottom: 1rem;
+}
+
+.ball {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  margin-right: 0.5rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
