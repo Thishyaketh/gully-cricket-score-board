@@ -1,41 +1,91 @@
-## What is this?
+# 🏏 Gully Cricket Score Board
 
-A gully cricket score board used to maintain the score of the team and individual players with runs, balls & strike rate including bowler's total over, maiden, runs given, economy, etc. This project was build using React JS and bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, mobile-first web application for tracking gully cricket matches in real-time. Maintains live scores for both teams and individual players with comprehensive statistics.
 
-## Screenshot
+## ✨ Features
 
-![Select Teams](public/images/1.PNG) ![Overs](public/images/2.PNG) ![Who is Batting](public/images/3.PNG) ![Wicket Type](public/images/4.PNG) ![2nd Inning winning hint](public/images/5.PNG) ![Match Won](public/images/6.PNG) ![Score Board](public/images/7.PNG)
+### Team & Player Tracking
+- **Real-time scorekeeping** – Track runs, balls faced, and strike rate for every batsman
+- **Bowler statistics** – Total overs bowled, maidens, runs conceded, economy rate
+- **Two-innings support** – Full match management with innings switching
+- **Wicket tracking** – Record wickets with type (bowled, caught, LBW, run out, etc.)
 
-## Recommendation
+### Match Management
+- **Team selection** – Custom team creation and player assignment
+- **Innings transition** – Smooth switch between batting sides
+- **Winning indicator** – Real-time winning hints for the 2nd innings team
+- **Match completion** – Final score summary with match winner announcement
 
-This application is best viewed in Mobile/Phone browser.
+## 📸 Screenshots
 
-## Problem
+| Select Teams | Overs Tracker | Who is Batting |
+|:---:|:---:|:---:|
+| ![Select Teams](public/images/1.PNG) | ![Overs](public/images/2.PNG) | ![Who is Batting](public/images/3.PNG) |
 
-Currently data has been managed using state. Hence don't refresh the page until the completion of match otherwise all data will be gone. For that you can use android application which you can **download** from the **Release Section**.
+| Wicket Type | 2nd Innings Hint | Match Won |
+|:---:|:---:|:---:|
+| ![Wicket Type](public/images/4.PNG) | ![Winning Hint](public/images/5.PNG) | ![Match Won](public/images/6.PNG) |
 
-## Is this live?
+| Final Score Board |
+|:---:|
+| ![Score Board](public/images/7.PNG) |
 
-Yes, this application is live and deployed in Netlify. You can check here [gully-cricket-score-board](https://gully-cricket.netlify.app/).
+## 🚀 Live Demo
 
-## Available Scripts
+Try it live: [gully-cricket.netlify.app](https://gully-cricket.netlify.app/)
 
-In the project directory, you can run:
+> **Tip:** Best experienced on a mobile or phone browser!
 
-### `npm start`
+## ⚠️ Important Note
 
-Runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Match data is stored in memory (React state). **Do not refresh the page** during a match, or all progress will be lost. For persistent access, download the Android app from the [Releases](https://github.com/Thishyaketh/gully-cricket-score-board/releases) section.
 
-The page will reload if you make edits. You will also see any lint errors in the console.
+## 🛠️ Tech Stack
 
-### `npm test`
+| Category | Technology |
+|:---|:---|
+| **Framework** | React 17 (Create React App) |
+| **UI Library** | Material-UI v5 + Emotion |
+| **Icons** | @mui/icons-material |
+| **Routing** | React Router DOM v5 |
+| **Form Handling** | Formik + Yup validation |
+| **Deployment** | Netlify |
 
-Launches the test runner in the interactive watch mode. See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📦 Getting Started
 
-### `npm run build`
+### Prerequisites
+- Node.js >= 14.x
+- npm or yarn
 
-Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
+### Installation
 
-The build is minified and the filenames include the hashes. Your app is ready to be deployed!
+```bash
+git clone https://github.com/Thishyaketh/gully-cricket-score-board.git
+cd gully-cricket-score-board
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Running Locally
+
+```bash
+npm start
+```
+
+The app will open at [http://localhost:3000](http://localhost:3000). Edit files to see hot-reloaded updates.
+
+## 📜 Available Scripts
+
+| Script | Description |
+|:---|:---|
+| `npm start` | Starts the development server on localhost:3000 |
+| `npm test` | Launches the Jest test runner in watch mode |
+| `npm run build` | Builds the production bundle into the `build/` folder |
+| `npm run eject` | Ejects from Create React App (irreversible) |
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+Made with ❤️ for gully cricket enthusiasts everywhere! 🏏
