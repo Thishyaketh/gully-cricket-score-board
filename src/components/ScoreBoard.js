@@ -22,19 +22,17 @@ import { BATTING, OUT } from '../constants/BattingStatus'
 import { BOLD, CATCH, HIT_WICKET, RUN_OUT, STUMP } from '../constants/OutType'
 import MathUtil from '../util/MathUtil';
 import BallByBall from './BallByBall';
-import CameraFeed from './CameraFeed';
-import Scorecard from './Scorecard';
-import Batting from './Batting';
-import Bowling from './Bowling';
 import ScoreActions from './ScoreActions';
+import VideoScorecard from './VideoScorecard';
 import './BallByBall.css';
-import './CameraFeed.css';
 import './ScoreBoard.css';
 import { radioGroupBoxstyle } from './ui/RadioGroupBoxStyle';
 
 const ScoreBoard = () => {
   const matchFormat = localStorage.getItem('matchFormat');
   const [session, setSession] = useState('Session 1');
+  const [day, setDay] = useState(1);
+  const [oversToday, setOversToday] = useState(0);
 
   const getInitialInnings = () => {
     if (matchFormat === 'Test') {
@@ -98,6 +96,43 @@ const ScoreBoard = () => {
     const endInningButton = document.getElementById('end-inning');
     endInningButton.disabled = true;
 
+    // Set initial batsmen
+    const initialBatter1Name = battingTeamPlayers[0];
+    const initialBatter2Name = battingTeamPlayers[1];
+    const randomNo1 = MathUtil.getRandomNo();
+    const randomNo2 = MathUtil.getRandomNo();
+
+    setBatter1({
+      id: initialBatter1Name + randomNo1,
+      name: initialBatter1Name,
+      run: 0,
+      ball: 0,
+      four: 0,
+      six: 0,
+      strikeRate: 0,
+      onStrike: true,
+      battingOrder: 1,
+      battingStatus: BATTING,
+    });
+
+    setBatter2({
+      id: initialBatter2Name + randomNo2,
+      name: initialBatter2Name,
+      run: 0,
+      ball: 0,
+      four: 0,
+      six: 0,
+      strikeRate: 0,
+      onStrike: false,
+      battingOrder: 2,
+      battingStatus: BATTING,
+    });
+
+    setBattingOrder(2);
+
+    const bowlerNameElement = document.querySelector('.react-autosuggest__input');
+    bowlerNameElement.disabled = true;
+
     const handleKeyDown = (event) => {
       const key = event.key;
       if (key >= '0' && key <= '6') {
@@ -130,6 +165,20 @@ const ScoreBoard = () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (matchFormat === 'Test') {
+      if (oversToday === 30) {
+        setSession('Lunch');
+      } else if (oversToday === 60) {
+        setSession('Tea');
+      } else if (oversToday === 90) {
+        setSession('Stumps');
+        setDay(day + 1);
+        setOversToday(0);
+      }
+    }
+  }, [oversToday]);
 
   const handleEndInning = (e) => {
     const endInningButton = document.getElementById('end-inning')
@@ -280,62 +329,6 @@ const ScoreBoard = () => {
       }
     }
   }
-  const handleBatter1Blur = (e) => {
-    let name = e.target.value
-    name = name.charAt(0).toUpperCase() + name.slice(1)
-    e.target.value = name
-    e.target.disabled = true
-    if (isBatter1Edited) {
-      setBatter1((state) => ({
-        ...state,
-        name: name,
-      }))
-      setBatter1Edited(false)
-    } else {
-      const randomNo = MathUtil.getRandomNo()
-      setBatter1({
-        id: name + randomNo,
-        name: name,
-        run: 0,
-        ball: 0,
-        four: 0,
-        six: 0,
-        strikeRate: 0,
-        onStrike: strikeValue === 'strike' ? true : false,
-        battingOrder: battingOrder + 1,
-        battingStatus: BATTING,
-      })
-      setBattingOrder(battingOrder + 1)
-    }
-  }
-  const handleBatter2Blur = (e) => {
-    let name = e.target.value
-    name = name.charAt(0).toUpperCase() + name.slice(1)
-    e.target.value = name
-    e.target.disabled = true
-    if (isBatter2Edited) {
-      setBatter2((state) => ({
-        ...state,
-        name: name,
-      }))
-      setBatter2Edited(false)
-    } else {
-      const randomNo = MathUtil.getRandomNo()
-      setBatter2({
-        id: name + randomNo,
-        name: name,
-        run: 0,
-        ball: 0,
-        four: 0,
-        six: 0,
-        strikeRate: 0,
-        onStrike: strikeValue === 'non-strike' ? true : false,
-        battingOrder: battingOrder + 1,
-        battingStatus: BATTING,
-      })
-      setBattingOrder(battingOrder + 1)
-    }
-  }
   const handleBowlerBlur = (e) => {
     let name = e.target.value
     if (name !== '') {
@@ -396,12 +389,18 @@ const ScoreBoard = () => {
       ...state,
       { overNo: overCount + 1, bowler: bowler.name, runs: runsByOverParam, stack: currentRunStackParam },
     ])
-    setInputBowler('')
+    setInputBowler('');
+    bowlerNameElement.value = '';
     setBowler({})
     setCurrentRunStack([])
     setRunsByOver(0)
     setBallCount(0)
-    setOverCount(overCount + 1)
+    setOverCount(overCount + 1);
+    if (matchFormat === 'Test') {
+      setOversToday(oversToday + 1);
+    }
+    const bowlerNameElement = document.querySelector('.react-autosuggest__input');
+    bowlerNameElement.disabled = false;
     const index = bowlers.findIndex((blr) => blr.id === bowler.id)
     let isMaidenOver = true
     let countWicket = 0
@@ -453,11 +452,6 @@ const ScoreBoard = () => {
     }
   }
   const newBatter1 = () => {
-    const nextBatter = battingTeamPlayers[battingOrder + 1];
-    const batter1NameElement = document.getElementById('batter1Name');
-    batter1NameElement.value = nextBatter;
-    batter1NameElement.disabled = true;
-
     const { id, name, run, ball, four, six, strikeRate, onStrike } = batter1;
     setBatters((state) => [
       ...state,
@@ -473,15 +467,25 @@ const ScoreBoard = () => {
         battingOrder: batter1.battingOrder,
         battingStatus: OUT,
       },
-    ])
-    setBatter1({})
-  }
-  const newBatter2 = () => {
-    const nextBatter = battingTeamPlayers[battingOrder + 1];
-    const batter2NameElement = document.getElementById('batter2Name');
-    batter2NameElement.value = nextBatter;
-    batter2NameElement.disabled = true;
+    ]);
+    const nextBatterName = battingTeamPlayers[battingOrder];
+    const randomNo = MathUtil.getRandomNo();
+    setBatter1({
+      id: nextBatterName + randomNo,
+      name: nextBatterName,
+      run: 0,
+      ball: 0,
+      four: 0,
+      six: 0,
+      strikeRate: 0,
+      onStrike: true,
+      battingOrder: battingOrder + 1,
+      battingStatus: BATTING,
+    });
+    setBattingOrder(battingOrder + 1);
+  };
 
+  const newBatter2 = () => {
     const { id, name, run, ball, four, six, strikeRate, onStrike } = batter2;
     setBatters((state) => [
       ...state,
@@ -497,9 +501,23 @@ const ScoreBoard = () => {
         battingOrder: batter2.battingOrder,
         battingStatus: OUT,
       },
-    ])
-    setBatter2({})
-  }
+    ]);
+    const nextBatterName = battingTeamPlayers[battingOrder];
+    const randomNo = MathUtil.getRandomNo();
+    setBatter2({
+      id: nextBatterName + randomNo,
+      name: nextBatterName,
+      run: 0,
+      ball: 0,
+      four: 0,
+      six: 0,
+      strikeRate: 0,
+      onStrike: true,
+      battingOrder: battingOrder + 1,
+      battingStatus: BATTING,
+    });
+    setBattingOrder(battingOrder + 1);
+  };
   const editBatter1Name = () => {
     if (overCount !== maxOver && wicketCount !== 10 && !hasMatchEnded) {
       const batter1NameElement = document.getElementById('batter1Name')
@@ -1130,11 +1148,29 @@ const ScoreBoard = () => {
   )
   return (
     <div className='container'>
-      <CameraFeed />
+      <VideoScorecard
+        scoringTeam={inningNo % 2 !== 0 ? scoringTeam : chasingTeam}
+        totalRuns={totalRuns}
+        wicketCount={wicketCount}
+        totalOvers={totalOvers}
+        crr={crr}
+        strikeValue={strikeValue}
+        handleStrikeChange={handleStrikeChange}
+        batter1={batter1}
+        batter2={batter2}
+        editBatter1Name={editBatter1Name}
+        editBatter2Name={editBatter2Name}
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+        inputProps={inputProps}
+        editBowlerName={editBowlerName}
+        currentRunStack={currentRunStack}
+        undoDelivery={undoDelivery}
+      />
       <div className='inning'>
         <div>
           {team1} vs {team2}, Inning {inningNo}
-          {matchFormat === 'Test' && <span style={{ marginLeft: '20px' }}>{session}</span>}
+          {matchFormat === 'Test' && <span style={{ marginLeft: '20px' }}>Day {day}, {session}</span>}
         </div>
         <div>
           <button id='end-inning' onClick={handleEndInning}>
@@ -1229,31 +1265,6 @@ const ScoreBoard = () => {
             </Box>
           </Modal>
         </div>
-        <Scorecard
-          scoringTeam={inningNo % 2 !== 0 ? scoringTeam : chasingTeam}
-          totalRuns={totalRuns}
-          wicketCount={wicketCount}
-          totalOvers={totalOvers}
-          crr={crr}
-        />
-        <Batting
-          strikeValue={strikeValue}
-          handleStrikeChange={handleStrikeChange}
-          batter1={batter1}
-          batter2={batter2}
-          handleBatter1Blur={handleBatter1Blur}
-          handleBatter2Blur={handleBatter2Blur}
-          editBatter1Name={editBatter1Name}
-          editBatter2Name={editBatter2Name}
-        />
-        <Bowling
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-          inputProps={inputProps}
-          editBowlerName={editBowlerName}
-          currentRunStack={currentRunStack}
-          undoDelivery={undoDelivery}
-        />
         <ScoreActions
           handleRun={handleRun}
           handleNoBall={handleNoBall}
