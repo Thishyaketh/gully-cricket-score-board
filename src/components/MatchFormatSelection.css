@@ -22,7 +22,21 @@
 
 .card-actions {
   display: flex;
+  justify-content: center;
   gap: 1rem;
+}
+
+.quick-match-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.quick-match-label {
+  margin: 0 0 0.75rem 0;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .btn {
@@ -38,4 +52,14 @@
 
 .btn:hover {
   background-color: #0056b3;
+}
+
+.btn-premade {
+  width: 100%;
+  background-color: #2e7d32;
+  font-weight: 600;
+}
+
+.btn-premade:hover {
+  background-color: #1b5e20;
 }

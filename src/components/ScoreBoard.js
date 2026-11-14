@@ -93,10 +93,46 @@ const ScoreBoard = () => {
   const [bowlingTeamPlayers, setBowlingTeamPlayers] = useState(
     batting === team1 ? team2Players : team1Players
   );
+  const maxWickets = Math.max(
+    1,
+    (battingTeamPlayers && battingTeamPlayers.length ? battingTeamPlayers.length : 11) - 1
+  );
+
+  const createBatterObject = (name, onStrike, order) => ({
+    id: name + MathUtil.getRandomNo(),
+    name,
+    run: 0,
+    ball: 0,
+    four: 0,
+    six: 0,
+    strikeRate: 0,
+    onStrike,
+    battingOrder: order,
+    battingStatus: BATTING,
+  });
 
   useEffect(() => {
     const endInningButton = document.getElementById('end-inning');
     endInningButton.disabled = true;
+
+    if (
+      battingTeamPlayers &&
+      battingTeamPlayers.length >= 2 &&
+      battingTeamPlayers[0] &&
+      battingTeamPlayers[1]
+    ) {
+      const batter1NameElement = document.getElementById('batter1Name');
+      const batter2NameElement = document.getElementById('batter2Name');
+      if (batter1NameElement && batter2NameElement) {
+        batter1NameElement.value = battingTeamPlayers[0];
+        batter1NameElement.disabled = true;
+        batter2NameElement.value = battingTeamPlayers[1];
+        batter2NameElement.disabled = true;
+        setBatter1(createBatterObject(battingTeamPlayers[0], true, 1));
+        setBatter2(createBatterObject(battingTeamPlayers[1], false, 2));
+        setBattingOrder(2);
+      }
+    }
 
     const handleKeyDown = (event) => {
       const key = event.key;
@@ -261,16 +297,36 @@ const ScoreBoard = () => {
         setRemainingBalls(maxOver * 6);
         setRemainingRuns(totalRuns + 1);
 
+        const nextBattingPlayers = bowlingTeamPlayers;
+        const nextBowlingPlayers = battingTeamPlayers;
+        setBattingTeamPlayers(nextBattingPlayers);
+        setBowlingTeamPlayers(nextBowlingPlayers);
+
         const bowlerNameElement = document.querySelector('.react-autosuggest__input');
         bowlerNameElement.disabled = false;
 
         const batter1NameElement = document.getElementById('batter1Name');
-        batter1NameElement.value = '';
-        batter1NameElement.disabled = false;
-
         const batter2NameElement = document.getElementById('batter2Name');
-        batter2NameElement.value = '';
-        batter2NameElement.disabled = false;
+
+        if (
+          nextBattingPlayers &&
+          nextBattingPlayers.length >= 2 &&
+          nextBattingPlayers[0] &&
+          nextBattingPlayers[1]
+        ) {
+          batter1NameElement.value = nextBattingPlayers[0];
+          batter1NameElement.disabled = true;
+          batter2NameElement.value = nextBattingPlayers[1];
+          batter2NameElement.disabled = true;
+          setBatter1(createBatterObject(nextBattingPlayers[0], true, 1));
+          setBatter2(createBatterObject(nextBattingPlayers[1], false, 2));
+          setBattingOrder(2);
+        } else {
+          batter1NameElement.value = '';
+          batter1NameElement.disabled = false;
+          batter2NameElement.value = '';
+          batter2NameElement.disabled = false;
+        }
 
         setStrikeValue('strike');
         endInningButton.disabled = true;
@@ -453,9 +509,9 @@ const ScoreBoard = () => {
     }
   }
   const newBatter1 = () => {
-    const nextBatter = battingTeamPlayers[battingOrder + 1];
+    const nextBatter = battingTeamPlayers[battingOrder];
     const batter1NameElement = document.getElementById('batter1Name');
-    batter1NameElement.value = nextBatter;
+    batter1NameElement.value = nextBatter || '';
     batter1NameElement.disabled = true;
 
     const { id, name, run, ball, four, six, strikeRate, onStrike } = batter1;
@@ -474,12 +530,17 @@ const ScoreBoard = () => {
         battingStatus: OUT,
       },
     ])
-    setBatter1({})
+    if (nextBatter) {
+      setBatter1(createBatterObject(nextBatter, strikeValue === 'strike', battingOrder + 1))
+      setBattingOrder(battingOrder + 1)
+    } else {
+      setBatter1({})
+    }
   }
   const newBatter2 = () => {
-    const nextBatter = battingTeamPlayers[battingOrder + 1];
+    const nextBatter = battingTeamPlayers[battingOrder];
     const batter2NameElement = document.getElementById('batter2Name');
-    batter2NameElement.value = nextBatter;
+    batter2NameElement.value = nextBatter || '';
     batter2NameElement.disabled = true;
 
     const { id, name, run, ball, four, six, strikeRate, onStrike } = batter2;
@@ -498,24 +559,29 @@ const ScoreBoard = () => {
         battingStatus: OUT,
       },
     ])
-    setBatter2({})
+    if (nextBatter) {
+      setBatter2(createBatterObject(nextBatter, strikeValue === 'non-strike', battingOrder + 1))
+      setBattingOrder(battingOrder + 1)
+    } else {
+      setBatter2({})
+    }
   }
   const editBatter1Name = () => {
-    if (overCount !== maxOver && wicketCount !== 10 && !hasMatchEnded) {
+    if (overCount !== maxOver && wicketCount !== maxWickets && !hasMatchEnded) {
       const batter1NameElement = document.getElementById('batter1Name')
       batter1NameElement.disabled = false
       setBatter1Edited(true)
     }
   }
   const editBatter2Name = () => {
-    if (overCount !== maxOver && wicketCount !== 10 && !hasMatchEnded) {
+    if (overCount !== maxOver && wicketCount !== maxWickets && !hasMatchEnded) {
       const batter2NameElement = document.getElementById('batter2Name')
       batter2NameElement.disabled = false
       setBatter2Edited(true)
     }
   }
   const editBowlerName = () => {
-    if (overCount !== maxOver && wicketCount !== 10 && !hasMatchEnded) {
+    if (overCount !== maxOver && wicketCount !== maxWickets && !hasMatchEnded) {
       const bowlerNameElement = document.querySelector('.react-autosuggest__input')
       bowlerNameElement.disabled = false
       setBowlerEdited(true)
@@ -973,7 +1039,7 @@ const ScoreBoard = () => {
       }
     }
     if (isNoBall) {
-      if (isRunOut && wicketCount + 1 === 10) {
+      if (isRunOut && wicketCount + 1 === maxWickets) {
         const endInningButton = document.getElementById('end-inning')
         endInningButton.disabled = false
         const bowlerNameElement = document.querySelector('.react-autosuggest__input')
@@ -985,7 +1051,7 @@ const ScoreBoard = () => {
         setInputBowler('')
       }
     } else {
-      if (wicketCount + 1 === 10) {
+      if (wicketCount + 1 === maxWickets) {
         const endInningButton = document.getElementById('end-inning')
         endInningButton.disabled = false
         const bowlerNameElement = document.querySelector('.react-autosuggest__input')
@@ -1078,9 +1144,9 @@ const ScoreBoard = () => {
     if (inningNo === 4) {
       target = match.innings[0].runs + match.innings[2].runs - (match.innings[1].runs);
       if (totalRuns >= target) {
-        winningMessage = `${chasingTeam} won by ${10 - wicketCount} wickets`;
+        winningMessage = `${chasingTeam} won by ${maxWickets - wicketCount} wickets`;
         endMatch();
-      } else if (wicketCount === 10 || totalOvers === maxOver) {
+      } else if (wicketCount === maxWickets || totalOvers === maxOver) {
         if (totalRuns === target - 1) {
           winningMessage = 'Match Tied';
         } else {
@@ -1095,14 +1161,14 @@ const ScoreBoard = () => {
     target = previousInning ? previousInning.runs + 1 : 0;
     winningMessage = `${chasingTeam} needs ${target - totalRuns} runs in ${maxOver * 6 - (overCount * 6 + ballCount)} balls to win`;
     if (totalRuns >= target) {
-      winningMessage = `${chasingTeam} won by ${10 - wicketCount} wickets`;
+      winningMessage = `${chasingTeam} won by ${maxWickets - wicketCount} wickets`;
       endMatch();
     }
-    if ((wicketCount >= 10 || overCount >= maxOver) && totalRuns < target - 1) {
+    if ((wicketCount >= maxWickets || overCount >= maxOver) && totalRuns < target - 1) {
       winningMessage = `${scoringTeam} won by ${target - totalRuns - 1} runs`;
       endMatch();
     }
-    if (wicketCount < 10 && overCount === maxOver && totalRuns === target - 1) {
+    if (wicketCount < maxWickets && overCount === maxOver && totalRuns === target - 1) {
       winningMessage = 'Match Tied';
       endMatch();
     }
@@ -1110,14 +1176,18 @@ const ScoreBoard = () => {
   const welcomeContent = (
     <>
       <div></div>
-      <div>Welcome to Gully Cricket Score Board</div>
+      <div>
+        {data.tossWinner && data.tossChoice
+          ? `${data.tossWinner} won the toss & chose to ${data.tossChoice}`
+          : 'Welcome to Gully Cricket Score Board'}
+      </div>
       <div></div>
     </>
   )
   const firstInningCompletedContent = (
     <>
       {overCount === maxOver && <div>1st inning completed</div>}
-      {wicketCount === 10 && <div>All Out</div>}
+      {wicketCount === maxWickets && <div>All Out</div>}
       <div>Please click "End Inning" button</div>
     </>
   )
@@ -1145,8 +1215,8 @@ const ScoreBoard = () => {
       <div id='badge' className='badge badge-flex'>
         {inningNo % 2 === 0 && matchFormat !== 'Test'
           ? remainingRunsContent
-          : overCount === maxOver || wicketCount === 10
-          ? inningCompletedContent
+          : overCount === maxOver || wicketCount === maxWickets
+          ? firstInningCompletedContent
           : welcomeContent}
       </div>
       <div className='score-container'>

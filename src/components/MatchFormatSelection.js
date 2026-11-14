@@ -1,5 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { PREMADE_MATCH } from '../constants/PremadeMatch';
 import './MatchFormatSelection.css';
 
 const MatchFormatSelection = () => {
@@ -23,6 +24,12 @@ const MatchFormatSelection = () => {
           </button>
           <button className="btn" onClick={() => handleFormatSelection('Test')}>
             Test
+          </button>
+        </div>
+        <div className="quick-match-section">
+          <p className="quick-match-label">Pre-made Match ({PREMADE_MATCH.maxOver} Overs)</p>
+          <button className="btn btn-premade" onClick={() => history.push('/quick-match')}>
+            {PREMADE_MATCH.team1} vs {PREMADE_MATCH.team2}
           </button>
         </div>
       </div>
