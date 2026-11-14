@@ -1185,7 +1185,7 @@ const ScoreBoard = () => {
   )
   return (
     <div className='container'>
-      <CameraFeed />
+      {!data.disableCamera && <CameraFeed />}
       <div className='inning'>
         <div>
           {team1} vs {team2}, Inning {inningNo}

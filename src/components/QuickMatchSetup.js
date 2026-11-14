@@ -72,6 +72,7 @@ const QuickMatchSetup = () => {
       batting: battingFirst,
       tossWinner,
       tossChoice,
+      disableCamera: true,
     };
 
     localStorage.setItem('matchFormat', PREMADE_MATCH.matchFormat);
