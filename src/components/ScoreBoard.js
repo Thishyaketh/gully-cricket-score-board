@@ -1,23 +1,16 @@
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import {
   Button,
   FormControl,
-  FormControlLabel,
-  IconButton,
   InputLabel,
   MenuItem,
   Modal,
-  Radio,
   RadioGroup,
   Select,
   TextField,
 } from '@mui/material';
 import Box from '@mui/material/Box';
-import { pink } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import Autosuggest from 'react-autosuggest'
 import { BATTING, OUT } from '../constants/BattingStatus'
 import { BOLD, CATCH, HIT_WICKET, RUN_OUT, STUMP } from '../constants/OutType'
 import MathUtil from '../util/MathUtil';
@@ -165,6 +158,7 @@ const ScoreBoard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEndInning = (e) => {
@@ -423,14 +417,6 @@ const ScoreBoard = () => {
     const inputValue = param.value.trim().toLowerCase()
     const suggestionArr = inputValue.length === 0 ? [] : bowlers.filter((bowlerObj) => bowlerObj.name.toLowerCase().includes(inputValue))
     setSuggestions(suggestionArr)
-  }
-  const getSuggestionValue = (suggestion) => {
-    setBowler({
-      id: suggestion.id,
-      name: suggestion.name,
-    })
-    setNameSuggested(true)
-    return suggestion.name
   }
   const inputProps = {
     value: inputBowler,
@@ -1133,7 +1119,6 @@ const ScoreBoard = () => {
   let crr = (totalRuns / overs).toFixed(2)
   crr = isFinite(crr) ? crr : 0
   const currentInningIndex = inningNo - 1;
-  const currentInning = match.innings[currentInningIndex];
   const previousInning = inningNo > 1 ? match.innings[currentInningIndex - 1] : null;
   const scoringTeam = batting === team1 ? team1 : team2;
   const chasingTeam = scoringTeam === team1 ? team2 : team1;
